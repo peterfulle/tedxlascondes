@@ -142,7 +142,7 @@ const Hero = ({ countdown }) => (
           <span className="text-white"> nuestro futuro</span>
         </h1>
         <p className="text-xl md:text-2xl mb-8 text-gray-300">
-          TEDxLasCondes 2025: Horizontes Emergentes
+          TEDxLasCondes 2025: Interestelar
         </p>
         <div className="bg-black/40 backdrop-blur-md p-6 rounded-2xl mb-8 inline-block border border-gray-800/50">
           <p className="text-lg mb-4">Próximo evento: 15 de Mayo, 2025</p>
