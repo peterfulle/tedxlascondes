@@ -685,6 +685,32 @@ const SpeakerRegistrationPlatform = () => {
     
     if (allValid) {
       setIsSubmitting(true);
+
+      // Crear objeto de postulación
+      const newApplication = {
+        id: `SP${Date.now()}`, // ID único
+        nombre: formData.nombre,
+        apellido: formData.apellido,
+        email: formData.email,
+        tituloCharla: formData.tituloCharla,
+        categorias: formData.categorias,
+        biografia: formData.biografia,
+        ciudad: formData.ciudad,
+        pais: formData.pais,
+        fechaPostulacion: new Date().toISOString().split('T')[0],
+        estado: 'pendiente', // Estado inicial
+        evaluacion: 0,
+        fotoPerfil: null, // No guardamos archivos en localStorage
+        disponibilidad: formData.disponibilidad,
+        comentariosInternos: ''
+      };
+
+      // Guardar en localStorage
+      const existingApplications = 
+      JSON.parse(localStorage.getItem('tedx_applications') || '[]');
+    
+      const updatedApplications = [...existingApplications, newApplication];
+      localStorage.setItem('tedx_applications', JSON.stringify(updatedApplications));
       
       // Simulamos envío al servidor
       setTimeout(() => {

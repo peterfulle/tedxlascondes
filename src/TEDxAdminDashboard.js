@@ -34,152 +34,21 @@ import {
 
 
 
-// Simulación de datos desde el formulario de registro
 const fetchApplicationData = () => {
-  // En una implementación real, esto se conectaría a una API para obtener los datos
   return new Promise((resolve) => {
     setTimeout(() => {
-      // Simulamos datos que vendrían del formulario
-      const mockData = [
-        {
-          id: "SP001",
-          nombre: "Gabriela",
-          apellido: "Mistral",
-          email: "gabriela.mistral@ejemplo.com",
-          tituloCharla: "La educación como herramienta de transformación social",
-          categorias: ["educacion", "sociedad"],
-          biografia: "Educadora, diplomática y poeta chilena, ganadora del Premio Nobel de Literatura en 1945. Ha dedicado su vida a la educación y la literatura.",
-          ciudad: "Santiago",
-          pais: "Chile",
-          fechaPostulacion: "2025-04-10",
-          estado: "revision",
-          evaluacion: 4.5,
-          fotoPerfil: null, // En el sistema real sería una URL a la imagen
-          disponibilidad: ["15-mayo-am", "16-mayo-pm"],
-          comentariosInternos: "Excelente trayectoria, perfil muy interesante para el evento."
-        },
-        {
-          id: "SP002",
-          nombre: "Pablo",
-          apellido: "Neruda",
-          email: "pablo.neruda@ejemplo.com",
-          tituloCharla: "El poder transformador de la poesía en tiempos de crisis",
-          categorias: ["arte", "cultura"],
-          biografia: "Poeta chileno, considerado entre los más destacados e influyentes artistas de su siglo. Premio Nobel de Literatura en 1971.",
-          ciudad: "Valparaíso",
-          pais: "Chile",
-          fechaPostulacion: "2025-04-11",
-          estado: "aprobado",
-          evaluacion: 5,
-          fotoPerfil: null,
-          disponibilidad: ["15-mayo-pm", "16-mayo-am"],
-          comentariosInternos: "Perfil extraordinario, prioridad absoluta."
-        },
-        {
-          id: "SP003",
-          nombre: "Isabel",
-          apellido: "Allende",
-          email: "isabel.allende@ejemplo.com",
-          tituloCharla: "Narración y memoria: Construyendo puentes entre generaciones",
-          categorias: ["cultura", "sociedad"],
-          biografia: "Escritora chilena, miembro de la Academia Estadounidense de las Artes y las Letras desde 2004. Una de las autoras más leídas del mundo hispano.",
-          ciudad: "Santiago",
-          pais: "Chile",
-          fechaPostulacion: "2025-04-12",
-          estado: "pendiente",
-          evaluacion: 4,
-          fotoPerfil: null,
-          disponibilidad: ["15-mayo-am"],
-          comentariosInternos: ""
-        },
-        {
-          id: "SP004",
-          nombre: "Claudio",
-          apellido: "Bravo",
-          email: "claudio.bravo@ejemplo.com",
-          tituloCharla: "Resiliencia y liderazgo en el deporte de alto rendimiento",
-          categorias: ["deporte", "liderazgo", "bienestar"],
-          biografia: "Futbolista chileno, capitán de la selección nacional y portero de prestigiosos clubes europeos.",
-          ciudad: "Barcelona",
-          pais: "España",
-          fechaPostulacion: "2025-04-13",
-          estado: "pendiente",
-          evaluacion: 3.5,
-          fotoPerfil: null,
-          disponibilidad: ["16-mayo-pm"],
-          comentariosInternos: "Perfil interesante pero poco disponible para ensayos."
-        },
-        {
-          id: "SP005",
-          nombre: "Alejandro",
-          apellido: "Aravena",
-          email: "alejandro.aravena@ejemplo.com",
-          tituloCharla: "Arquitectura social: Diseñando soluciones para un futuro sostenible",
-          categorias: ["innovacion", "sostenibilidad"],
-          biografia: "Arquitecto chileno, ganador del Premio Pritzker. Conocido por su enfoque en la vivienda social y el desarrollo urbano sostenible.",
-          ciudad: "Santiago",
-          pais: "Chile",
-          fechaPostulacion: "2025-04-14",
-          estado: "revision",
-          evaluacion: 4.8,
-          fotoPerfil: null,
-          disponibilidad: ["15-mayo-am", "15-mayo-pm", "16-mayo-am", "16-mayo-pm"],
-          comentariosInternos: "Gran disponibilidad y tema muy relevante."
-        },
-        {
-          id: "SP006",
-          nombre: "Bárbara",
-          apellido: "Hernández",
-          email: "barbara.hernandez@ejemplo.com",
-          tituloCharla: "Superando límites: Mi experiencia en las aguas más frías del planeta",
-          categorias: ["deporte", "superacion", "bienestar"],
-          biografia: "Nadadora chilena de aguas abiertas, conocida como 'La Sirena de Hielo'. Primera sudamericana en completar la Triple Corona de natación.",
-          ciudad: "Santiago",
-          pais: "Chile",
-          fechaPostulacion: "2025-04-14",
-          estado: "rechazado",
-          evaluacion: 3.2,
-          fotoPerfil: null,
-          disponibilidad: ["15-mayo-pm"],
-          comentariosInternos: "Temática alejada del enfoque del evento este año."
-        },
-        {
-          id: "SP007",
-          nombre: "Fernando",
-          apellido: "Gonzalez",
-          email: "fernando.gonzalez@ejemplo.com",
-          tituloCharla: "De la competencia individual a la construcción de legados colectivos",
-          categorias: ["deporte", "educacion", "liderazgo"],
-          biografia: "Ex tenista profesional chileno, medallista olímpico y fundador de una fundación dedicada al desarrollo de jóvenes a través del deporte.",
-          ciudad: "Santiago",
-          pais: "Chile",
-          fechaPostulacion: "2025-04-15",
-          estado: "pendiente",
-          evaluacion: 4.0,
-          fotoPerfil: null,
-          disponibilidad: ["16-mayo-am", "16-mayo-pm"],
-          comentariosInternos: ""
-        },
-        {
-          id: "SP008",
-          nombre: "Constanza",
-          apellido: "Michelson",
-          email: "constanza.michelson@ejemplo.com",
-          tituloCharla: "Salud mental en la era digital: Nuevos desafíos y oportunidades",
-          categorias: ["salud", "tecnologia", "bienestar"],
-          biografia: "Psicóloga y escritora chilena, especializada en psicoanálisis y cultura. Columnista en diversos medios de comunicación.",
-          ciudad: "Santiago",
-          pais: "Chile",
-          fechaPostulacion: "2025-04-15",
-          estado: "aprobado",
-          evaluacion: 4.7,
-          fotoPerfil: null,
-          disponibilidad: ["15-mayo-am", "15-mayo-pm"],
-          comentariosInternos: "Excelente comunicadora, tema muy relevante."
-        }
-      ];
-      resolve(mockData);
-    }, 800); // Simulamos un retraso de conexión a API
+      // Datos mock existentes
+      const mockData = [ /* tus datos mock existentes */ ];
+      
+      // Obtener postulaciones de localStorage
+      const localStorageData = 
+        JSON.parse(localStorage.getItem('tedx_applications') || '[]');
+      
+      // Combinar datos mock con datos de localStorage
+      const combinedData = [...mockData, ...localStorageData];
+      
+      resolve(combinedData);
+    }, 800);
   });
 };
 
