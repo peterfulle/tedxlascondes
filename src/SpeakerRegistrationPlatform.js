@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import SpeakerService from './api-service';
+
 // @ts-nocheck
 import {
   Mic,
@@ -670,7 +672,8 @@ const SpeakerRegistrationPlatform = () => {
   
 
 
-  const handleSubmit = (e) => {
+  // Función handleSubmit modificada
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Primero resetear los errores
@@ -686,41 +689,73 @@ const SpeakerRegistrationPlatform = () => {
     if (allValid) {
       setIsSubmitting(true);
 
-      // Crear objeto de postulación
-      const newApplication = {
-        id: `SP${Date.now()}`, // ID único
-        nombre: formData.nombre,
-        apellido: formData.apellido,
-        email: formData.email,
-        tituloCharla: formData.tituloCharla,
-        categorias: formData.categorias,
-        biografia: formData.biografia,
-        ciudad: formData.ciudad,
-        pais: formData.pais,
-        fechaPostulacion: new Date().toISOString().split('T')[0],
-        estado: 'pendiente', // Estado inicial
-        evaluacion: 0,
-        fotoPerfil: null, // No guardamos archivos en localStorage
-        disponibilidad: formData.disponibilidad,
-        comentariosInternos: ''
-      };
-
-      // Guardar en localStorage
-      const existingApplications = 
-      JSON.parse(localStorage.getItem('tedx_applications') || '[]');
-    
-      const updatedApplications = [...existingApplications, newApplication];
-      localStorage.setItem('tedx_applications', JSON.stringify(updatedApplications));
-      
-      // Simulamos envío al servidor
-      setTimeout(() => {
-        console.log('Formulario enviado:', formData);
+      try {
+        // Crear el objeto de postulación para enviar a la API
+        const speakerData = {
+          nombre: formData.nombre,
+          apellido: formData.apellido,
+          email: formData.email,
+          telefono: formData.telefono,
+          ciudad: formData.ciudad,
+          pais: formData.pais,
+          biografia: formData.biografia,
+          
+          // Redes sociales
+          website: formData.website || "",
+          linkedin: formData.linkedin || "",
+          twitter: formData.twitter || "",
+          instagram: formData.instagram || "",
+          youtube: formData.youtube || "",
+          
+          // Propuesta
+          tituloCharla: formData.tituloCharla,
+          categorias: formData.categorias,
+          descripcionBreve: formData.descripcionBreve,
+          descripcionDetallada: formData.descripcionDetallada,
+          impactoEsperado: formData.impactoEsperado,
+          experienciaPrevia: formData.experienciaPrevia || "",
+          motivacion: formData.motivacion,
+          
+          // Disponibilidad
+          disponibilidad: formData.disponibilidad,
+          
+          // URLs de archivos - esto se maneja por separado
+          fotoPerfilUrl: formData.fotoPerfil ? "pending_upload" : null,
+          cvUrl: formData.cv ? "pending_upload" : null,
+          presentacionUrl: formData.presentacion ? "pending_upload" : null,
+          videoDemo: formData.videoDemo || null,
+          
+          // Términos
+          aceptaTerminos: formData.aceptaTerminos,
+          aceptaComunicaciones: formData.aceptaComunicaciones
+        };
+        
+        // Enviar datos a la API
+        const response = await SpeakerService.createSpeaker(speakerData);
+        console.log('Speaker creado:', response);
+        
+        // Si hay archivos, aquí se implementaría la lógica para subirlos
+        // y luego actualizar el registro con las URLs correctas
+        if (formData.fotoPerfil || formData.cv || formData.presentacion) {
+          // Aquí iría la lógica para subir archivos a un servicio de almacenamiento
+          // y luego actualizar el registro con SpeakerService.updateSpeaker
+          console.log('Archivos pendientes de subir');
+        }
+        
+        // Mostrar pantalla de éxito
         setIsSubmitting(false);
         setIsSubmitted(true);
         
         // Limpiar datos guardados
         localStorage.removeItem('tedx_speaker_form');
-      }, 2000);
+      } catch (error) {
+        console.error('Error al enviar la postulación:', error);
+        setFormErrors(prev => ({
+          ...prev,
+          submit: `Error al enviar la postulación: ${error.message}`
+        }));
+        setIsSubmitting(false);
+      }
     } else {
       // Encontrar el primer paso con errores y navegar a ese paso
       let stepWithError = 1;

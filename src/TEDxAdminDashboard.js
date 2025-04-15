@@ -32,24 +32,19 @@ import {
   RefreshCw
 } from 'lucide-react';
 
+import SpeakerService from './api-service';
 
 
-const fetchApplicationData = () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Datos mock existentes
-      const mockData = [ /* tus datos mock existentes */ ];
-      
-      // Obtener postulaciones de localStorage
-      const localStorageData = 
-        JSON.parse(localStorage.getItem('tedx_applications') || '[]');
-      
-      // Combinar datos mock con datos de localStorage
-      const combinedData = [...mockData, ...localStorageData];
-      
-      resolve(combinedData);
-    }, 800);
-  });
+
+
+const fetchApplicationData = async () => {
+  try {
+    const data = await SpeakerService.getSpeakers();
+    return data;
+  } catch (error) {
+    console.error("Error al cargar los datos:", error);
+    return [];
+  }
 };
 
 // Componente principal del Dashboard
@@ -85,14 +80,15 @@ const TEDxAdminDashboard = () => {
   // Cargar datos cuando se monta el componente
   useEffect(() => {
     const loadData = async () => {
+      setIsLoading(true);
       try {
         const data = await fetchApplicationData();
         setApplications(data);
         setFilteredApplications(data);
         calculateStats(data);
-        setIsLoading(false);
       } catch (error) {
         console.error("Error al cargar los datos:", error);
+      } finally {
         setIsLoading(false);
       }
     };
@@ -183,30 +179,96 @@ const TEDxAdminDashboard = () => {
   const currentItems = filteredApplications.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredApplications.length / itemsPerPage);
 
-  // Actualizar el estado de una postulación
-  const updateApplicationStatus = (id, newStatus) => {
-    const updatedApps = applications.map(app => {
-      if (app.id === id) {
-        const updatedApp = { ...app, estado: newStatus };
-        
-        // Si estamos viendo los detalles de esta aplicación, actualizar también ahí
-        if (selectedApplication && selectedApplication.id === id) {
-          setSelectedApplication(updatedApp);
-        }
-        
-        return updatedApp;
-      }
-      return app;
-    });
-    
-    setApplications(updatedApps);
-    calculateStats(updatedApps);
+
+  // Añadir función para cargar estadísticas directamente de la API
+  const loadStats = async () => {
+    try {
+      const statsData = await SpeakerService.getStats();
+      setStats({
+        total: statsData.status.total,
+        pendientes: statsData.status.pendientes,
+        enRevision: statsData.status.enRevision,
+        aprobados: statsData.status.aprobados,
+        rechazados: statsData.status.rechazados,
+        categorias: statsData.categories
+      });
+    } catch (error) {
+      console.error("Error al cargar estadísticas:", error);
+      // Usar calculateStats con datos locales como fallback
+      calculateStats(applications);
+    }
   };
 
+  // Actualizar el estado de una postulación
+  const updateApplicationStatus = async (id, newStatus) => {
+    try {
+      const updatedApp = await SpeakerService.updateSpeaker(id, { estado: newStatus });
+      
+      // Actualizar el estado local
+      const updatedApps = applications.map(app => {
+        if (app.id === id) {
+          // Si estamos viendo los detalles de esta aplicación, actualizar también ahí
+          if (selectedApplication && selectedApplication.id === id) {
+            setSelectedApplication(updatedApp);
+          }
+          return updatedApp;
+        }
+        return app;
+      });
+      
+      setApplications(updatedApps);
+      calculateStats(updatedApps);
+      
+      // Mostrar mensaje de éxito (podrías implementar un sistema de notificaciones)
+      console.log(`Estado actualizado a: ${newStatus}`);
+    } catch (error) {
+      console.error(`Error al actualizar el estado a ${newStatus}:`, error);
+      // Mostrar mensaje de error
+      alert(`Error al actualizar el estado: ${error.message}`);
+    }
+  };
+
+  // Añadir una función para eliminar un speaker
+  const deleteSpeakerHandler = async (id) => {
+    if (window.confirm("¿Estás seguro de que deseas eliminar esta postulación? Esta acción no se puede deshacer.")) {
+      try {
+        await SpeakerService.deleteSpeaker(id);
+        
+        // Actualizar el estado local
+        const updatedApps = applications.filter(app => app.id !== id);
+        setApplications(updatedApps);
+        setFilteredApplications(filteredApplications.filter(app => app.id !== id));
+        calculateStats(updatedApps);
+        
+        // Si estamos viendo los detalles de esta aplicación, cerrar el modal
+        if (selectedApplication && selectedApplication.id === id) {
+          setShowDetailsModal(false);
+        }
+        
+        // Mostrar mensaje de éxito
+        console.log(`Postulación eliminada correctamente`);
+      } catch (error) {
+        console.error(`Error al eliminar la postulación:`, error);
+        alert(`Error al eliminar la postulación: ${error.message}`);
+      }
+    }
+  };
+
+  
+
   // Ver detalles de una postulación
-  const viewApplicationDetails = (application) => {
-    setSelectedApplication(application);
-    setShowDetailsModal(true);
+  const viewApplicationDetails = async (application) => {
+    try {
+      // Cargar los datos más recientes directamente de la API
+      const freshData = await SpeakerService.getSpeaker(application.id);
+      setSelectedApplication(freshData);
+      setShowDetailsModal(true);
+    } catch (error) {
+      console.error(`Error al cargar detalles del speaker ${application.id}:`, error);
+      // Usar los datos que ya tenemos como fallback
+      setSelectedApplication(application);
+      setShowDetailsModal(true);
+    }
   };
 
   // Mapeo de categorías para mostrar nombres legibles
