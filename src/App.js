@@ -1,8 +1,8 @@
 import React, { useState, useEffect, lazy, Suspense, useCallback } from 'react';
 import { 
   Play, Calendar, Search, Menu, X, ChevronRight, Heart, Share2, 
-  Clock, Mic, ArrowRight, Globe, Users, Sparkles, 
-  Send, ChevronDown 
+  Clock, Mic, Globe, Users, Sparkles, 
+  ChevronDown 
 } from 'lucide-react';
 import {
   BrowserRouter,
@@ -157,7 +157,7 @@ const Hero = ({ countdown }) => (
         </div>
         <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
           <a 
-            href="#charlas-destacadas" 
+            href="#charlas" 
             className="bg-gradient-to-r from-red-600 to-red-700 text-white px-8 py-4 rounded-full flex items-center justify-center hover:from-red-700 hover:to-red-800 transition-all group shadow-lg shadow-red-900/20"
           >
             <Play className="w-5 h-5 mr-2 group-hover:scale-110 transition" />
