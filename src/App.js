@@ -8,11 +8,144 @@ import {
   BrowserRouter,
   Routes,
   Route,
-  Link
+  Link,
+  useNavigate,
+  useLocation,
+  Navigate
 } from 'react-router-dom';
+
+
 
 // Importaciones diferidas para mejorar el rendimiento
 const SpeakerRegistrationPlatform = lazy(() => import('./SpeakerRegistrationPlatform'));
+const TEDxAdminDashboard = lazy(() => import('./TEDxAdminDashboard'));
+
+
+// Componente para proteger rutas de administrador
+const ProtectedRoute = ({ children }) => {
+  const isAuthenticated = localStorage.getItem('auth_token');
+  const isAdmin = localStorage.getItem('user_role') === 'admin';
+  const location = useLocation();
+
+  if (!isAuthenticated) {
+    // Redirigir al login si no está autenticado
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+  
+  if (!isAdmin) {
+    // Redirigir al inicio si no es administrador
+    return <Navigate to="/" state={{ from: location }} replace />;
+  }
+
+  return children;
+};
+
+// Componente de Login
+const LoginPage = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+    
+    try {
+      // En un caso real, harías una llamada a tu API
+      // Este es solo un ejemplo para simulación
+      if (email === 'admin@tedx.com' && password === 'admin123') {
+        // Simular un retraso de red
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Guardar los datos de autenticación
+        localStorage.setItem('auth_token', 'example-token-12345');
+        localStorage.setItem('user_role', 'admin');
+        
+        // Redirigir al dashboard
+        navigate('/admin');
+      } else {
+        setError('Credenciales incorrectas');
+      }
+    } catch (err) {
+      setError('Error al iniciar sesión. Inténtalo de nuevo.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+      <div className="bg-gray-800 rounded-xl max-w-md w-full p-8 shadow-lg border border-gray-700">
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center">
+            <div className="text-red-600 font-bold text-3xl mr-2">TEDx</div>
+            <div className="text-white font-bold text-xl">LasCondes</div>
+          </div>
+          <h2 className="text-2xl font-bold mt-4 text-white">Acceso Dirección</h2>
+        </div>
+        
+        {error && (
+          <div className="bg-red-900/20 border border-red-900/30 text-red-500 p-3 rounded-lg mb-6 text-sm">
+            {error}
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium mb-2 text-gray-300">
+              Correo electrónico
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+              placeholder="admin@tedx.com"
+            />
+          </div>
+          
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium mb-2 text-gray-300">
+              Contraseña
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-4 py-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+              placeholder="••••••••"
+            />
+          </div>
+          
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 rounded-lg text-white hover:from-red-700 hover:to-red-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? (
+              <span className="flex items-center justify-center">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Iniciando sesión...
+              </span>
+            ) : (
+              'Iniciar sesión'
+            )}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
 
 // Header mejorado con diseño más elegante y moderno
 const Header = ({ isMenuOpen, toggleMenu }) => (
@@ -41,8 +174,16 @@ const Header = ({ isMenuOpen, toggleMenu }) => (
             </Link>
           ))}
         </div>
-        
-        <div className="flex space-x-3">
+
+        <div className="flex items-center space-x-3">
+          {localStorage.getItem('user_role') === 'admin' && (
+            <Link 
+              to="/admin" 
+              className="border border-red-500 text-red-500 px-4 py-2 rounded-full hover:bg-red-500 hover:text-white transition-all text-sm font-medium"
+            >
+              Dashboard Admin
+            </Link>
+          )}
           <Link 
             to="/register-speaker" 
             className="border border-gray-700 text-white px-4 py-2 rounded-full hover:border-red-500 hover:text-red-500 transition-all text-sm font-medium"
@@ -56,7 +197,34 @@ const Header = ({ isMenuOpen, toggleMenu }) => (
             <Calendar className="w-4 h-4 mr-2" />
             Próximo Evento
           </Link>
+          {localStorage.getItem('auth_token') ? (
+            <button 
+              onClick={() => {
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('user_role');
+                window.location.href = '/';
+              }}
+              className="text-gray-300 hover:text-white transition-all text-sm font-medium flex items-center"
+            >
+              <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Cerrar sesión
+            </button>
+          ) : (
+            <Link 
+              to="/login" 
+              className="text-gray-300 hover:text-white transition-all text-sm font-medium flex items-center"
+            >
+              <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              </svg>
+              Iniciar sesión
+            </Link>
+          )}
         </div>
+        
+
       </nav>
       
       {/* Mobile Menu Button - Mejorado con transición */}
@@ -72,7 +240,8 @@ const Header = ({ isMenuOpen, toggleMenu }) => (
         )}
       </button>
     </div>
-    
+
+
     {/* Mobile Navigation - Animación y diseño mejorado */}
     {isMenuOpen && (
       <div className="md:hidden bg-gray-900/95 backdrop-blur-md py-4 animate-fadeIn border-b border-gray-800 absolute w-full">
@@ -91,6 +260,15 @@ const Header = ({ isMenuOpen, toggleMenu }) => (
               {item.name}
             </Link>
           ))}
+          {/* Añadir esta condición para mostrar el enlace al dashboard solo si es admin */}
+          {localStorage.getItem('user_role') === 'admin' && (
+            <Link 
+              to="/admin" 
+              className="block py-3 px-4 text-red-500 hover:bg-gray-800 rounded-lg hover:text-white transition"
+            >
+              Dashboard Admin
+            </Link>
+          )}
           <div className="pt-3 space-y-3 border-t border-gray-800 mt-3">
             <Link 
               to="/register-speaker" 
@@ -109,6 +287,8 @@ const Header = ({ isMenuOpen, toggleMenu }) => (
         </div>
       </div>
     )}
+    
+    
   </header>
 );
 
@@ -1954,6 +2134,20 @@ const App = () => {
           
           {/* Ruta para la plataforma de registro de ponentes */}
           <Route path="/register-speaker" element={<SpeakerRegistrationPlatform />} />
+          
+          {/* AÑADIR ESTAS NUEVAS RUTAS */}
+          {/* Ruta para login */}
+          <Route path="/login" element={<LoginPage />} />
+          
+          {/* Ruta protegida para el dashboard administrativo */}
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute>
+                <TEDxAdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
           
           {/* Rutas adicionales */}
           <Route path="/charlas" element={<TEDxLasCondesApp />} />
