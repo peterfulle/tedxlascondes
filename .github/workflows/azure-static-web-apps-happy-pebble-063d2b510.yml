@@ -23,12 +23,13 @@ jobs:
           submodules: true
           lfs: false
           
-      # Agregar este paso para instalar Node.js v20.x
+      # Este paso es para configurar Node.js 20.x
       - name: Set up Node.js 20.x
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
 
+      # Continúa con el resto de tus pasos
       - name: Install OIDC Client from Core Package
         run: npm install @actions/core@1.6.0 @actions/http-client
 
@@ -51,6 +52,7 @@ jobs:
           api_location: "" # Api source code path - optional
           output_location: "build" # Built app content directory - optional
           github_id_token: ${{ steps.idtoken.outputs.result }}
+
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
