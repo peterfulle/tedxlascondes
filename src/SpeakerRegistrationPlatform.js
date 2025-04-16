@@ -670,123 +670,194 @@ const SpeakerRegistrationPlatform = () => {
       setTimeout(() => setShowSuccessMessage(false), 3000);
     }, 800);
   };
+
+
+
+
+  // Mock de SpeakerService para pruebas
+  
+
   
 
 
+  // Ejemplo de uso en el componente
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Primero resetear los errores
+    // Resetear errores
     setFormErrors({});
+    setIsSubmitting(true);
     
-    // Validar cada paso
-    const step1Valid = validateStep(1);
-    const step2Valid = validateStep(2);
-    const step3Valid = validateStep(3);
-    
-    const allValid = step1Valid && step2Valid && step3Valid;
-    
-    if (allValid) {
-      setIsSubmitting(true);
-  
-      try {
-        // Crear el objeto de postulación para enviar a la API
-        const speakerData = {
-          nombre: formData.nombre,
-          apellido: formData.apellido,
-          email: formData.email,
-          telefono: formData.telefono,
-          ciudad: formData.ciudad,
-          pais: formData.pais,
-          biografia: formData.biografia,
-          
-          // Redes sociales
-          website: formData.website || "",
-          linkedin: formData.linkedin || "",
-          twitter: formData.twitter || "",
-          instagram: formData.instagram || "",
-          youtube: formData.youtube || "",
-          
-          // Propuesta
-          tituloCharla: formData.tituloCharla,
-          categorias: formData.categorias,
-          descripcionBreve: formData.descripcionBreve,
-          descripcionDetallada: formData.descripcionDetallada,
-          impactoEsperado: formData.impactoEsperado,
-          experienciaPrevia: formData.experienciaPrevia || "",
-          motivacion: formData.motivacion,
-          
-          // Disponibilidad
-          disponibilidad: formData.disponibilidad,
-          
-          // URLs de archivos - esto se maneja por separado
-          fotoPerfilUrl: formData.fotoPerfil ? "pending_upload" : null,
-          cvUrl: formData.cv ? "pending_upload" : null,
-          presentacionUrl: formData.presentacion ? "pending_upload" : null,
-          videoDemo: formData.videoDemo || null,
-          
-          // Términos
-          aceptaTerminos: formData.aceptaTerminos,
-          aceptaComunicaciones: formData.aceptaComunicaciones
-        };
+    try {
+      // Validación general
+      const validationErrors = validateForm(formData);
+      
+      if (Object.keys(validationErrors).length > 0) {
+        setFormErrors(validationErrors);
+        setIsSubmitting(false);
         
-        // Enviar datos a la API usando el servicio
-        const response = await SpeakerService.createSpeaker(speakerData);
-        console.log('Speaker creado:', response);
-        
-        // Si hay archivos y quieres manejarlos con el servicio de almacenamiento
-        if (formData.fotoPerfil || formData.cv || formData.presentacion) {
-          try {
-            const fileUrls = {};
-            
-            // Subir foto de perfil si existe
-            if (formData.fotoPerfil) {
-              // Esta línea simula la subida del archivo mientras implementas el almacenamiento real
-              console.log('Simulando subida de foto de perfil:', formData.fotoPerfil.name);
-              fileUrls.fotoPerfilUrl = `https://example.com/mock-upload/${response.id}/fotoPerfil/${formData.fotoPerfil.name}`;
-            }
-            
-            // Subir CV si existe
-            if (formData.cv) {
-              console.log('Simulando subida de CV:', formData.cv.name);
-              fileUrls.cvUrl = `https://example.com/mock-upload/${response.id}/cv/${formData.cv.name}`;
-            }
-            
-            // Subir presentación si existe
-            if (formData.presentacion) {
-              console.log('Simulando subida de presentación:', formData.presentacion.name);
-              fileUrls.presentacionUrl = `https://example.com/mock-upload/${response.id}/presentacion/${formData.presentacion.name}`;
-            }
-            
-            // Actualizar el registro del speaker con las URLs de los archivos
-            if (Object.keys(fileUrls).length > 0) {
-              await SpeakerService.updateSpeaker(response.id, fileUrls);
-              console.log('Información de archivos actualizada:', fileUrls);
-            }
-          } catch (fileError) {
-            console.error('Error al procesar archivos:', fileError);
-            // No impedir que el usuario continúe si falló la subida de archivos
-          }
+        // Scroll al primer error
+        const firstErrorField = Object.keys(validationErrors)[0];
+        const errorElement = document.querySelector(`[name="${firstErrorField}"]`);
+        if (errorElement) {
+          errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
         
-        // Mostrar pantalla de éxito
-        setIsSubmitting(false);
-        setIsSubmitted(true);
-        
-        // Limpiar datos guardados
-        localStorage.removeItem('tedx_speaker_form');
-      } catch (error) {
-        console.error('Error al enviar la postulación:', error);
-        setFormErrors(prev => ({
-          ...prev,
-          submit: `Error al enviar la postulación: ${error.message}`
-        }));
-        setIsSubmitting(false);
+        return;
       }
-    } else {
-      // El resto del código de manejo de errores se mantiene igual...
+      
+      // Preparar datos para envío
+      const speakerData = {
+        nombre: formData.nombre,
+        apellido: formData.apellido,
+        email: formData.email,
+        telefono: formData.telefono,
+        ciudad: formData.ciudad,
+        pais: formData.pais,
+        biografia: formData.biografia,
+        
+        // Redes sociales (opcional)
+        website: formData.website || null,
+        linkedin: formData.linkedin || null,
+        twitter: formData.twitter || null,
+        instagram: formData.instagram || null,
+        youtube: formData.youtube || null,
+        
+        // Propuesta de charla
+        tituloCharla: formData.tituloCharla,
+        categorias: formData.categorias,
+        descripcionBreve: formData.descripcionBreve,
+        descripcionDetallada: formData.descripcionDetallada,
+        impactoEsperado: formData.impactoEsperado,
+        motivacion: formData.motivacion,
+        
+        // Disponibilidad
+        disponibilidad: formData.disponibilidad,
+        
+        // Términos
+        aceptaTerminos: formData.aceptaTerminos
+      };
+      
+      // Enviar datos del speaker
+      const speakerResponse = await SpeakerService.createSpeaker(speakerData);
+      
+      // Manejar archivos si existen
+      if (formData.fotoPerfil || formData.cv || formData.presentacion) {
+        const fileUrls = {};
+        
+        // Simular subida de archivos
+        if (formData.fotoPerfil) {
+          fileUrls.fotoPerfilUrl = `https://ejemplo.com/uploads/${speakerResponse.id}/perfil.jpg`;
+        }
+        
+        if (formData.cv) {
+          fileUrls.cvUrl = `https://ejemplo.com/uploads/${speakerResponse.id}/cv.pdf`;
+        }
+        
+        if (formData.presentacion) {
+          fileUrls.presentacionUrl = `https://ejemplo.com/uploads/${speakerResponse.id}/presentacion.pdf`;
+        }
+        
+        // Actualizar registro con URLs de archivos
+        await SpeakerService.updateSpeaker(speakerResponse.id, fileUrls);
+      }
+      
+      // Limpiar datos guardados
+      localStorage.removeItem('tedx_speaker_form');
+      
+      // Marcar como enviado
+      setIsSubmitted(true);
+      setIsSubmitting(false);
+      
+    } catch (error) {
+      console.error('Error en el envío:', error);
+      
+      setFormErrors(prev => ({
+        ...prev,
+        submit: `Error al enviar la postulación: ${error.message}`
+      }));
+      
+      setIsSubmitting(false);
     }
   };
+
+
+
+  // Mock de SpeakerService para pruebas
+  const SpeakerService = {
+    createSpeaker: async (speakerData) => {
+      // Simular una llamada de API
+      return new Promise((resolve, reject) => {
+        try {
+          // Simular validación y creación
+          console.log('Datos del speaker:', speakerData);
+          
+          // Simular ID generado
+          const mockResponse = {
+            id: `TEDX-${Math.floor(Math.random() * 1000000)}`,
+            message: 'Speaker registrado exitosamente'
+          };
+          
+          // Simular tiempo de espera de red
+          setTimeout(() => {
+            resolve(mockResponse);
+          }, 1500);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    },
+    
+    updateSpeaker: async (id, updateData) => {
+      // Simular actualización de speaker
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({
+            id,
+            ...updateData,
+            message: 'Información actualizada'
+          });
+        }, 500);
+      });
+    }
+  };
+
+
+  // Función de validación central
+  const validateForm = (formData) => {
+    const errors = {};
+
+    // Validaciones personales
+    if (!formData.nombre) errors.nombre = 'Nombre es obligatorio';
+    if (!formData.apellido) errors.apellido = 'Apellido es obligatorio';
+    if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = 'Correo electrónico inválido';
+    }
+    if (!formData.telefono) errors.telefono = 'Teléfono es obligatorio';
+    if (!formData.ciudad) errors.ciudad = 'Ciudad es obligatoria';
+
+    // Validaciones de propuesta
+    if (!formData.tituloCharla) errors.tituloCharla = 'Título de charla es obligatorio';
+    if (formData.categorias.length === 0) errors.categorias = 'Selecciona al menos una categoría';
+    if (!formData.descripcionBreve) errors.descripcionBreve = 'Descripción breve es obligatoria';
+    if (!formData.descripcionDetallada) errors.descripcionDetallada = 'Descripción detallada es obligatoria';
+    if (!formData.impactoEsperado) errors.impactoEsperado = 'Impacto esperado es obligatorio';
+    
+    // Validaciones de disponibilidad
+    if (formData.disponibilidad.length === 0) errors.disponibilidad = 'Selecciona al menos una fecha';
+    
+    // Validaciones de materiales
+    if (!formData.fotoPerfil) errors.fotoPerfil = 'Foto de perfil es obligatoria';
+    
+    // Validaciones de términos
+    if (!formData.aceptaTerminos) errors.aceptaTerminos = 'Debes aceptar los términos y condiciones';
+
+    return errors;
+  };
+
+
+
+
   
   // Sección: Información Personal
   const renderPersonalInfoSection = () => (
