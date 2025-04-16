@@ -2291,11 +2291,12 @@ const SpeakerRegistrationPlatform = () => {
                    <button
                      type="submit"
                      disabled={isSubmitting || !formData.aceptaTerminos}
-                     className="bg-gradient-to-r from-red-600 to-red-700 text-white px-8 py-3 rounded-lg hover:from-red-700 hover:to-red-800 transition flex items-center justify-center shadow-lg shadow-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
-                   >
+                     className="bg-gradient-to-r from-red-600 to-red-700 text-white px-8 py-3 rounded-lg hover:from-red-700 hover:to-red-800 transition flex items-center justify-center shadow-lg shadow-red-900/20 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation transform active:scale-95"
+                     >
                      {isSubmitting ? (
                        <>
                          <div className="animate-spin mr-2 h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+                         
                          Enviando...
                        </>
                      ) : (
