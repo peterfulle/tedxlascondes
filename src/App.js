@@ -317,7 +317,7 @@ const Hero = ({ countdown }) => (
       <div className="max-w-3xl">
         <div className="bg-gradient-to-r from-red-600 to-red-700 h-1 w-24 mb-8 rounded-full"></div>
         <h1 className="text-5xl md:text-7xl font-bold mb-4 leading-tight">
-          <span className="text-white">Ideas que</span> 
+          <span className="text-white">Macarena</span> 
           <span className="text-red-600"> transforman</span> 
           <span className="text-white"> nuestro futuro</span>
         </h1>

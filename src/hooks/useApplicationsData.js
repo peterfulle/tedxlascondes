@@ -25,16 +25,7 @@ export const useApplicationsData = () => {
       setError(null);
       try {
         const data = await SpeakerService.getSpeakers();
-        
-        // Normalizar los datos para evitar problemas
-        const normalizedData = data.map(app => ({
-          ...app,
-          evaluacion: app.evaluacion || 0,
-          estado: app.estado || 'pendiente',
-          categorias: app.categorias || [],
-          fechaPostulacion: app.fechaPostulacion || new Date().toISOString()
-        }));
-        
+        const normalizedData = normalizeApplicationData(data);
         setApplications(normalizedData);
         setFilteredApplications(normalizedData);
         calculateStats(normalizedData);
@@ -48,6 +39,23 @@ export const useApplicationsData = () => {
     
     loadData();
   }, []);
+
+  // Añade esta función para normalizar los datos antes de setApplications
+  const normalizeApplicationData = (applications) => {
+    return applications.map(app => ({
+      ...app,
+      evaluacion: app.evaluacion || 0,
+      estado: app.estado || 'pendiente',
+      categorias: app.categorias || [],
+      fechaPostulacion: app.fechaPostulacion || new Date().toISOString(),
+      nombre: app.nombre || '',
+      apellido: app.apellido || '',
+      email: app.email || '',
+      ciudad: app.ciudad || '',
+      pais: app.pais || 'Chile',
+      tituloCharla: app.tituloCharla || ''
+    }));
+  };
 
   // Calcular estadísticas
   const calculateStats = (data) => {
