@@ -112,13 +112,14 @@ const TEDxAdminDashboard = () => {
       
       switch (sortBy) {
         case 'fecha':
-          comparison = new Date(a.fechaPostulacion) - new Date(b.fechaPostulacion);
+          comparison = new Date(a.fechaPostulacion || 0) - new Date(b.fechaPostulacion || 0);
           break;
         case 'nombre':
-          comparison = `${a.nombre} ${a.apellido}`.localeCompare(`${b.nombre} ${b.apellido}`);
+          comparison = `${a.nombre || ''} ${a.apellido || ''}`.localeCompare(`${b.nombre || ''} ${b.apellido || ''}`);
           break;
         case 'evaluacion':
-          comparison = a.evaluacion - b.evaluacion;
+          // Usar 0 como valor predeterminado para evaluaciones inexistentes
+          comparison = (a.evaluacion || 0) - (b.evaluacion || 0);
           break;
         default:
           comparison = 0;

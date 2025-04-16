@@ -2,50 +2,43 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import date
 import uuid
+from typing import List, Optional
+from pydantic import BaseModel, Field
 
 class Speaker(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    nombre: str
-    apellido: str
-    email: str
+    id: str
+    nombre: Optional[str] = None
+    apellido: Optional[str] = None
+    email: Optional[str] = None
     telefono: Optional[str] = None
-    ciudad: str
-    pais: str = "Chile"
-    biografia: str
+    ciudad: Optional[str] = None
+    pais: Optional[str] = "Chile"
+    biografia: Optional[str] = None
     
-    # Redes sociales
     website: Optional[str] = None
     linkedin: Optional[str] = None
     twitter: Optional[str] = None
     instagram: Optional[str] = None
     youtube: Optional[str] = None
     
-    # Propuesta
-    tituloCharla: str
-    categorias: List[str]
-    descripcionBreve: str
-    descripcionDetallada: str
-    impactoEsperado: str
+    tituloCharla: Optional[str] = None
+    categorias: Optional[List[str]] = []
+    descripcionBreve: Optional[str] = None
+    descripcionDetallada: Optional[str] = None
+    impactoEsperado: Optional[str] = None
     experienciaPrevia: Optional[str] = None
-    motivacion: str
+    motivacion: Optional[str] = None
     
-    # Estado de la postulación
-    estado: str = "pendiente"  # pendiente, revision, aprobado, rechazado
-    evaluacion: float = 0.0    # De 0 a 5
-    fechaPostulacion: str = Field(default_factory=lambda: date.today().isoformat())
+    disponibilidad: Optional[List[str]] = []
     
-    # Disponibilidad
-    disponibilidad: List[str]
-    
-    # Comentarios internos (solo para administradores)
-    comentariosInternos: Optional[str] = None
-    
-    # No se guardan los archivos directamente en la BD, sino referencias a ellos
     fotoPerfilUrl: Optional[str] = None
     cvUrl: Optional[str] = None
     presentacionUrl: Optional[str] = None
     videoDemo: Optional[str] = None
     
-    # Términos y condiciones
-    aceptaTerminos: bool = True
+    aceptaTerminos: Optional[bool] = False
     aceptaComunicaciones: Optional[bool] = False
+    
+    # Permitir campos adicionales que vienen de Cosmos DB
+    class Config:
+        extra = "allow"

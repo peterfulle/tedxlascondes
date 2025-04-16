@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
 import SpeakerService from './api-service';
+import React, { useState, useEffect } from 'react';
+
+
 
 
 // @ts-nocheck
@@ -674,19 +676,14 @@ const SpeakerRegistrationPlatform = () => {
 
 
 
-  // Mock de SpeakerService para pruebas
-  
-
-  
-
-
-  // Ejemplo de uso en el componente
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Resetear errores
     setFormErrors({});
     setIsSubmitting(true);
+    
+    console.log("Iniciando envío de formulario...");
     
     try {
       // Validación general
@@ -695,33 +692,29 @@ const SpeakerRegistrationPlatform = () => {
       if (Object.keys(validationErrors).length > 0) {
         setFormErrors(validationErrors);
         setIsSubmitting(false);
-        
-        // Scroll al primer error
-        const firstErrorField = Object.keys(validationErrors)[0];
-        const errorElement = document.querySelector(`[name="${firstErrorField}"]`);
-        if (errorElement) {
-          errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        
         return;
       }
       
       // Preparar datos para envío
       const speakerData = {
+        // Agregar id generado en el cliente para cumplir con la validación
+        id: `client-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        
+        // Campos personales
         nombre: formData.nombre,
         apellido: formData.apellido,
         email: formData.email,
         telefono: formData.telefono,
         ciudad: formData.ciudad,
-        pais: formData.pais,
+        pais: formData.pais || "Chile",
         biografia: formData.biografia,
         
         // Redes sociales (opcional)
-        website: formData.website || null,
-        linkedin: formData.linkedin || null,
-        twitter: formData.twitter || null,
-        instagram: formData.instagram || null,
-        youtube: formData.youtube || null,
+        website: formData.website || "",
+        linkedin: formData.linkedin || "",
+        twitter: formData.twitter || "",
+        instagram: formData.instagram || "",
+        youtube: formData.youtube || "",
         
         // Propuesta de charla
         tituloCharla: formData.tituloCharla,
@@ -729,37 +722,43 @@ const SpeakerRegistrationPlatform = () => {
         descripcionBreve: formData.descripcionBreve,
         descripcionDetallada: formData.descripcionDetallada,
         impactoEsperado: formData.impactoEsperado,
+        experienciaPrevia: formData.experienciaPrevia || "",
         motivacion: formData.motivacion,
         
         // Disponibilidad
         disponibilidad: formData.disponibilidad,
         
+        // VideoDemo (solo URL)
+        videoDemo: formData.videoDemo || "",
+        
         // Términos
-        aceptaTerminos: formData.aceptaTerminos
+        aceptaTerminos: formData.aceptaTerminos,
+        aceptaComunicaciones: formData.aceptaComunicaciones
       };
       
-      // Enviar datos del speaker
-      const speakerResponse = await SpeakerService.createSpeaker(speakerData);
+      console.log("Datos preparados para envío:", speakerData);
       
-      // Manejar archivos si existen
+      // Paso 1: Crear el registro de speaker
+      console.log("Llamando a SpeakerService.createSpeaker()...");
+      const speakerResponse = await SpeakerService.createSpeaker(speakerData);
+      console.log("Speaker creado con éxito:", speakerResponse);
+      
+      // Paso 2: Subir archivos si existen
       if (formData.fotoPerfil || formData.cv || formData.presentacion) {
-        const fileUrls = {};
-        
-        // Simular subida de archivos
-        if (formData.fotoPerfil) {
-          fileUrls.fotoPerfilUrl = `https://ejemplo.com/uploads/${speakerResponse.id}/perfil.jpg`;
+        try {
+          console.log("Subiendo archivos...");
+          const fileUrls = await SpeakerService.uploadSpeakerFiles(
+            speakerResponse.id, 
+            {
+              fotoPerfil: formData.fotoPerfil,
+              cv: formData.cv,
+              presentacion: formData.presentacion
+            }
+          );
+          console.log("Archivos subidos con éxito:", fileUrls);
+        } catch (fileError) {
+          console.error("Error al subir archivos:", fileError);
         }
-        
-        if (formData.cv) {
-          fileUrls.cvUrl = `https://ejemplo.com/uploads/${speakerResponse.id}/cv.pdf`;
-        }
-        
-        if (formData.presentacion) {
-          fileUrls.presentacionUrl = `https://ejemplo.com/uploads/${speakerResponse.id}/presentacion.pdf`;
-        }
-        
-        // Actualizar registro con URLs de archivos
-        await SpeakerService.updateSpeaker(speakerResponse.id, fileUrls);
       }
       
       // Limpiar datos guardados
@@ -774,53 +773,16 @@ const SpeakerRegistrationPlatform = () => {
       
       setFormErrors(prev => ({
         ...prev,
-        submit: `Error al enviar la postulación: ${error.message}`
+        submit: `Error al enviar la postulación: ${error.message || "Error de conexión con el servidor"}`
       }));
       
       setIsSubmitting(false);
     }
   };
 
+  
 
 
-  // Mock de SpeakerService para pruebas
-  const SpeakerService = {
-    createSpeaker: async (speakerData) => {
-      // Simular una llamada de API
-      return new Promise((resolve, reject) => {
-        try {
-          // Simular validación y creación
-          console.log('Datos del speaker:', speakerData);
-          
-          // Simular ID generado
-          const mockResponse = {
-            id: `TEDX-${Math.floor(Math.random() * 1000000)}`,
-            message: 'Speaker registrado exitosamente'
-          };
-          
-          // Simular tiempo de espera de red
-          setTimeout(() => {
-            resolve(mockResponse);
-          }, 1500);
-        } catch (error) {
-          reject(error);
-        }
-      });
-    },
-    
-    updateSpeaker: async (id, updateData) => {
-      // Simular actualización de speaker
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            id,
-            ...updateData,
-            message: 'Información actualizada'
-          });
-        }, 500);
-      });
-    }
-  };
 
 
   // Función de validación central

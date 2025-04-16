@@ -16,20 +16,25 @@ const ApplicationList = ({ applications, onViewDetails, onDelete }) => {
 
   // Renderizar estrellas de evaluación
   const renderStars = (rating) => {
+    // Verificar si rating es válido
+    if (rating === undefined || isNaN(rating)) {
+      rating = 0; // Valor predeterminado
+    }
+    
     const totalStars = 5;
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
     
     return (
       <div className="flex items-center">
-        {[...Array(fullStars)].map((_, i) => (
+        {[...Array(Math.max(0, fullStars))].map((_, i) => (
           <Star key={`full-${i}`} className="w-4 h-4 text-yellow-500 fill-yellow-500" />
         ))}
         {hasHalfStar && <StarHalf className="w-4 h-4 text-yellow-500 fill-yellow-500" />}
-        {[...Array(totalStars - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => (
+        {[...Array(Math.max(0, totalStars - fullStars - (hasHalfStar ? 1 : 0)))].map((_, i) => (
           <Star key={`empty-${i}`} className="w-4 h-4 text-gray-300" />
         ))}
-        <span className="ml-1 text-sm text-gray-400">{rating.toFixed(1)}</span>
+        <span className="ml-1 text-sm text-gray-400">{(rating || 0).toFixed(1)}</span>
       </div>
     );
   };

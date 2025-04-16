@@ -25,9 +25,19 @@ export const useApplicationsData = () => {
       setError(null);
       try {
         const data = await SpeakerService.getSpeakers();
-        setApplications(data);
-        setFilteredApplications(data);
-        calculateStats(data);
+        
+        // Normalizar los datos para evitar problemas
+        const normalizedData = data.map(app => ({
+          ...app,
+          evaluacion: app.evaluacion || 0,
+          estado: app.estado || 'pendiente',
+          categorias: app.categorias || [],
+          fechaPostulacion: app.fechaPostulacion || new Date().toISOString()
+        }));
+        
+        setApplications(normalizedData);
+        setFilteredApplications(normalizedData);
+        calculateStats(normalizedData);
       } catch (error) {
         console.error("Error al cargar los datos:", error);
         setError(error.message || "Error al cargar los datos");
